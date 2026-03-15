@@ -59,6 +59,8 @@ class _HomePageState extends State<HomePage> {
     if (_voiceService.alwaysOnMode) return;
 
     await _voiceService.startAlwaysListening(
+  Future<void> _startVoiceMode() async {
+    await _voiceService.startListening(
       onResult: (text, finalResult) async {
         final recognized = text.trim();
         if (recognized.isEmpty) return;
@@ -112,6 +114,7 @@ class _HomePageState extends State<HomePage> {
         response = await _aiService.askGemini(
           prompt: 'Você é a Fai, assistente pessoal de IA. Responda em português: $input',
           apiKey: AppSecrets.geminiApiKey,
+          apiKey: const String.fromEnvironment('GEMINI_API_KEY'),
         );
       }
     }
@@ -128,6 +131,7 @@ class _HomePageState extends State<HomePage> {
     await _voiceService.speak(response);
     await _startAlwaysOnAssistant();
     if (mounted) setState(() {});
+    await _voiceService.speak(response);
   }
 
   Future<void> _openInternalBrowser(String url) async {
@@ -219,6 +223,9 @@ class _HomePageState extends State<HomePage> {
                   },
                   icon: Icon(
                     _voiceService.alwaysOnMode ? Icons.mic : Icons.mic_none,
+                  onPressed: _startVoiceMode,
+                  icon: Icon(
+                    _voiceService.isListening ? Icons.mic : Icons.mic_none,
                   ),
                 ),
               ],

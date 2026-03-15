@@ -45,6 +45,7 @@ class VoiceService {
         partialResults: true,
         listenFor: const Duration(seconds: 30),
         pauseFor: const Duration(seconds: 5),
+        listenMode: ListenMode.confirmation,
         onResult: (result) {
           onResult(result.recognizedWords, result.finalResult);
         },
@@ -83,6 +84,7 @@ class VoiceService {
   Future<void> stopListening() async {
     _alwaysOnMode = false;
     _rearmTimer?.cancel();
+  Future<void> stopListening() async {
     if (_speech.isListening) {
       await _speech.stop();
     }
@@ -94,6 +96,8 @@ class VoiceService {
   void dispose() {
     _alwaysOnMode = false;
     _rearmTimer?.cancel();
+
+  void dispose() {
     _speech.cancel();
     _tts.stop();
   }
