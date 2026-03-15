@@ -9,7 +9,6 @@ import '../services/memory_service.dart';
 import '../services/monitor_service.dart';
 import '../services/voice_service.dart';
 import '../widgets/chat_bubble.dart';
-import '../config_secrets.dart';
 
 /// Tela principal do app Fai AI.
 class HomePage extends StatefulWidget {
@@ -107,7 +106,7 @@ class _HomePageState extends State<HomePage> {
         // Se nenhum comando local for detectado, usa IA remota.
         response = await _aiService.askGemini(
           prompt: 'Você é a Fai, assistente pessoal de IA. Responda em português: $input',
-          apiKey: AppSecrets.geminiApiKey,
+          apiKey: const String.fromEnvironment('GEMINI_API_KEY'),
         );
       }
     }
