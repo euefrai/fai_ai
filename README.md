@@ -30,3 +30,14 @@ flutter run
 
 A chave da API Gemini está em `lib/config_secrets.dart` para facilitar testes rápidos.
 Para produção, use `--dart-define` ou um backend seguro.
+
+## Build de APK via GitHub Actions
+
+Foi adicionado o workflow `.github/workflows/android-apk.yml`.
+
+Como usar:
+
+1. Envie o código para o GitHub.
+2. Abra a aba **Actions** no repositório.
+3. Execute manualmente **Build Android APK** (workflow_dispatch) ou faça push para `main`, `master` ou `work`.
+4. Ao final, baixe o artefato **fai-ai-release-apk**.
