@@ -9,6 +9,7 @@ import '../services/memory_service.dart';
 import '../services/monitor_service.dart';
 import '../services/voice_service.dart';
 import '../widgets/chat_bubble.dart';
+import '../config_secrets.dart';
 
 /// Tela principal do app Fai AI.
 class HomePage extends StatefulWidget {
@@ -41,6 +42,8 @@ class _HomePageState extends State<HomePage> {
     final oldMessages = await _memoryService.loadMessages();
     setState(() => _messages.addAll(oldMessages));
     await _voiceService.init();
+    await _startAlwaysOnAssistant();
+    if (mounted) setState(() {});
   }
 
   Future<void> _requestPermissions() async {
@@ -52,6 +55,10 @@ class _HomePageState extends State<HomePage> {
     ].request();
   }
 
+  Future<void> _startAlwaysOnAssistant() async {
+    if (_voiceService.alwaysOnMode) return;
+
+    await _voiceService.startAlwaysListening(
   Future<void> _startVoiceMode() async {
     await _voiceService.startListening(
       onResult: (text, finalResult) async {
@@ -106,6 +113,7 @@ class _HomePageState extends State<HomePage> {
         // Se nenhum comando local for detectado, usa IA remota.
         response = await _aiService.askGemini(
           prompt: 'Você é a Fai, assistente pessoal de IA. Responda em português: $input',
+          apiKey: AppSecrets.geminiApiKey,
           apiKey: const String.fromEnvironment('GEMINI_API_KEY'),
         );
       }
@@ -118,6 +126,11 @@ class _HomePageState extends State<HomePage> {
     );
 
     _appendMessage(faiMessage);
+    // Evita que a própria voz da Fai seja capturada como novo comando.
+    await _voiceService.stopListening();
+    await _voiceService.speak(response);
+    await _startAlwaysOnAssistant();
+    if (mounted) setState(() {});
     await _voiceService.speak(response);
   }
 
@@ -199,6 +212,17 @@ class _HomePageState extends State<HomePage> {
                   icon: const Icon(Icons.send),
                 ),
                 IconButton(
+                  onPressed: () async {
+                    if (_voiceService.alwaysOnMode) {
+                      await _voiceService.stopListening();
+                      if (mounted) setState(() {});
+                    } else {
+                      await _startAlwaysOnAssistant();
+                      if (mounted) setState(() {});
+                    }
+                  },
+                  icon: Icon(
+                    _voiceService.alwaysOnMode ? Icons.mic : Icons.mic_none,
                   onPressed: _startVoiceMode,
                   icon: Icon(
                     _voiceService.isListening ? Icons.mic : Icons.mic_none,
